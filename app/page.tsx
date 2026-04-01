@@ -8,6 +8,9 @@ import TopBar from '@/components/TopBar'
 import AgentDetail from '@/components/AgentDetail'
 import ActivityFeed from '@/components/ActivityFeed'
 import AgentCreationModal from '@/components/AgentCreationModal'
+import AgentsView from '@/components/AgentsView'
+import LearningView from '@/components/LearningView'
+import ActivityView from '@/components/ActivityView'
 import { Agent, AgentRole, AgentStatus, initialAgents } from '@/lib/agents'
 import { ActivityEvent, initialEvents, generateRandomEvent } from '@/lib/activity'
 
@@ -104,34 +107,58 @@ export default function Home() {
             <div className="absolute top-1/3 left-1/3 w-[400px] h-[400px] bg-cyan-900/8 rounded-full blur-[100px]" />
           </div>
 
-          {/* Canvas */}
-          <div className="relative flex-1">
-            <SpaceCanvas
-              agents={agents}
-              onAgentClick={handleAgentClick}
-              selectedAgentId={selectedAgent?.id ?? null}
-            />
-
-            {/* Canvas overlay hint */}
-            {selectedAgent === null && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.5 }}
-                className="absolute bottom-5 left-1/2 -translate-x-1/2 pointer-events-none"
-              >
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-white/4 border border-white/8 rounded-full">
-                  <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
-                  <span className="text-[11px] text-white/30">Click any agent to inspect</span>
+          {/* View switcher */}
+          <motion.div
+            key={activeView}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.25 }}
+            className="flex-1 flex flex-col overflow-hidden"
+          >
+            {activeView === 'space' && (
+              <>
+                <div className="relative flex-1">
+                  <SpaceCanvas
+                    agents={agents}
+                    onAgentClick={handleAgentClick}
+                    selectedAgentId={selectedAgent?.id ?? null}
+                  />
+                  {selectedAgent === null && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 1.5 }}
+                      className="absolute bottom-5 left-1/2 -translate-x-1/2 pointer-events-none"
+                    >
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-white/4 border border-white/8 rounded-full">
+                        <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
+                        <span className="text-[11px] text-white/30">Click any agent to inspect</span>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
-              </motion.div>
+                <div className="flex-shrink-0 h-44 border-t border-white/5 bg-[#0a0a0f]/80 backdrop-blur-lg">
+                  <ActivityFeed events={events} />
+                </div>
+              </>
             )}
-          </div>
 
-          {/* Activity feed strip at the bottom */}
-          <div className="flex-shrink-0 h-44 border-t border-white/5 bg-[#0a0a0f]/80 backdrop-blur-lg">
-            <ActivityFeed events={events} />
-          </div>
+            {activeView === 'agents' && (
+              <AgentsView
+                agents={agents}
+                onAgentSelect={handleAgentClick}
+                selectedAgentId={selectedAgent?.id ?? null}
+              />
+            )}
+
+            {activeView === 'learning' && (
+              <LearningView agents={agents} />
+            )}
+
+            {activeView === 'activity' && (
+              <ActivityView events={events} />
+            )}
+          </motion.div>
         </main>
 
         {/* Right panel — agent detail */}
